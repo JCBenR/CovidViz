@@ -43,11 +43,13 @@ changeTitle();
             for (const s of uempNums) {
                 stateList.push(s.State);
             }
-            console.log(stateList);
+            // console.log(stateList);
 
             /*CREATE DROP DOWN OF STATES */
+
             let drp = document.createElement('select');
-            document.body.appendChild(drp);
+            let dd = document.getElementById('dropDowns');
+            dd.appendChild(drp);
             stateList.forEach(e => {
                 var el = document.createElement('option');
                 el.textContent = e;
@@ -55,9 +57,28 @@ changeTitle();
                 drp.appendChild(el);
             });
 
+            /*CREATE LIST OF MONTHS */
+            var covMonths = []
+            uempNums.columns.forEach(m => {
+                covMonths.push(m);
+            })
+            covMonths.shift();
+            console.log(covMonths);
+
+            let mdrp = document.createElement('select');
+            dd.appendChild(mdrp);
+
+            /*CREATE DROP DOWN OF MONTHS */
+            covMonths.forEach(m => {
+                var el = document.createElement('option');
+                el.textContent = m;
+                el.value = m;
+                mdrp.appendChild(el);
+            });
+
             let ut = 'Utah';
-            let utahCovNums = uempNums.filter(obj => obj.State = ut)
-            console.log(utahCovNums[2]);
+            let utahCovNums = uempNums.filter(obj => obj.State == ut)
+            console.log(utahCovNums[0]);
             console.log(utahNums[3]);
             // for (const dt of stateCovidNums) {
             //     console.log(`${dt.State} ${dt["Jan 2020"]}`);
