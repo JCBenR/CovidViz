@@ -79,6 +79,7 @@ Promise.all([
 
     makeStateList();
     // console.log(stateList);
+
 })
     .catch((e) => {
         console.log(e);
@@ -117,7 +118,8 @@ function handleClick(e, d){
 }
 
 const updateGraph = () => {
-    bars;
+    console.log("updating...");
+    bars();
 }
 
 let canvas = d3.select("#canvas")
@@ -125,12 +127,12 @@ let canvas = d3.select("#canvas")
                 .attr("width", width)
                 .attr("height", height);
 
-let bars = canvas.selectAll("rect")
+let bars = () => canvas.selectAll("rect")
                 .data(selectedStates)
                 .enter()
                     .append("rect")
                     .attr("width", 25)
-                    .attr("height", function(d) {return widthScale(d);})
+                    .attr("height", 100)
                     .attr("fill", function(d) {return colorScale(d);}     
                     )
 
@@ -139,7 +141,7 @@ const colorScale = d3.scaleLinear()
                         .range(['#0b661a', '#dbc70d', '#db330d'])
 
 const widthScale = d3.scaleLinear()
-                    .domain([0, maxValue])
+                    .domain([50, maxValue])
                     .range([0, width])
 // chart = {
 //     const svg = d3.select(DOM.svg(width, height))
