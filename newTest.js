@@ -66,15 +66,17 @@ let stateAbrev = {
 }
 
 Promise.all([
-    d3.csv("utah-history.csv"),
-    d3.csv("unemploymentByState.csv")
-]).then((files) => {
-    var utahNums = files[0];
-    var uempNums = files[1];
+    d3.json("combo.json"),
+    // d3.csv("utah-history.csv"),
+    // d3.csv("unemploymentByState.csv")
+]).then((data) => {
+    // var utahNums = files[0];
+    // var uempNums = files[1];
 
     /*GET LIST OF STATES */
     var stateList = [];
-    for (const s of uempNums) {
+    for (const s of data) {
+        console.log(s);
         stateList.push(s.State);
     }
     // console.log(stateList);
@@ -122,28 +124,3 @@ Promise.all([
         console.log(e);
     });
 
-Promise.all([
-    d3.json("casesbyState.json"),
-    d3.json("unemploymentByState.json")
-]).then((data) => {
-    var cases = data[0];
-    var uempNums = data[1];
-
-    const findState = (object, abbrev) => {
-        return Object.keys(object).find(key => object[key] === abbrev);
-    }
-
-    // cases.forEach(c => {
-    //     for (const k in stateAbrev) {
-    //         if (c.state === k) {
-    //             c.abbr === stateAbrev[k];
-    //         }
-    //     }
-        //console.log(c.state);
-        
-        // let cstate = findState(stateAbrev, c.state);
-        // if(cstate === "Utah")
-        //     console.log("got one");
-    //});
-    
-})
