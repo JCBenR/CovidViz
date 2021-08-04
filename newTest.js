@@ -129,14 +129,21 @@ Promise.all([
     var cases = data[0];
     var uempNums = data[1];
 
-    const findState = (abbrev) => {
-        return abbrev.match(stateAbrev);
+    const findState = (object, abbrev) => {
+        return Object.keys(object).find(key => object[key] === abbrev);
     }
 
-    cases.forEach(c => {
-        let cstate = findState(c.state);
-        if(cstate === "Utah")
-            console.log(cstate);
-    });
+    // cases.forEach(c => {
+    //     for (const k in stateAbrev) {
+    //         if (c.state === k) {
+    //             c.abbr === stateAbrev[k];
+    //         }
+    //     }
+        //console.log(c.state);
+        
+        // let cstate = findState(stateAbrev, c.state);
+        // if(cstate === "Utah")
+        //     console.log("got one");
+    //});
     
 })
