@@ -68,6 +68,9 @@ let covidData;
 var stateList = [];
 let selectedStates = [];
 let maxValue = 1_200_000;
+let width = 600;
+let height = 600;
+
 Promise.all([
     d3.json("combo.json"),
 ]).then((data) => {
@@ -110,18 +113,34 @@ function handleClick(e, d){
     }
     console.log('clicked ', d);
     console.log(selectedStates);
-    //updateGraph();
+    updateGraph();
 }
 
 const updateGraph = () => {
-
+    bars;
 }
+
+let canvas = d3.select("#canvas")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
+
+let bars = canvas.selectAll("rect")
+                .data(selectedStates)
+                .enter()
+                    .append("rect")
+                    .attr("width", 25)
+                    .attr("height", function(d) {return widthScale(d);})
+                    .attr("fill", function(d) {return colorScale(d);}     
+                    )
 
 const colorScale = d3.scaleLinear()
                         .domain([0, maxValue])
                         .range(['#0b661a', '#dbc70d', '#db330d'])
 
-
+const widthScale = d3.scaleLinear()
+                    .domain([0, maxValue])
+                    .range([0, width])
 // chart = {
 //     const svg = d3.select(DOM.svg(width, height))
 //         .attr("viewBox", `${-width / 2} ${-height / 2} ${width} ${height}`)
