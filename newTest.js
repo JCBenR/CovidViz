@@ -64,7 +64,9 @@ let stateAbrev = {
     "WI": "Wisconsin",
     "WY": "Wyoming"
 }
-
+let covidData;
+var stateList = [];
+let selectedStates = [];
 Promise.all([
     d3.json("combo.json"),
     // d3.csv("utah-history.csv"),
@@ -74,53 +76,80 @@ Promise.all([
     // var uempNums = files[1];
 
     /*GET LIST OF STATES */
-    var stateList = [];
-    for (const s of data) {
-        console.log(s);
+    covidData = data[0];
+
+    for (const s of data[0]) {
         stateList.push(s.State);
     }
+
+    makeStateList();
     // console.log(stateList);
 
     /*CREATE DROP DOWN OF STATES */
 
-    let drp = document.createElement('select');
-    let dd = document.getElementById('dropDowns');
-    dd.appendChild(drp);
-    stateList.forEach(e => {
-        var el = document.createElement('option');
-        el.textContent = e;
-        el.value = e;
-        drp.appendChild(el);
-    });
+    // let drp = document.createElement('select');
+    // let dd = document.getElementById('dropDowns');
+    // dd.appendChild(drp);
+    // stateList.forEach(e => {
+    //     var el = document.createElement('option');
+    //     el.textContent = e;
+    //     el.value = e;
+    //     drp.appendChild(el);
+    // });
 
-    /*CREATE LIST OF MONTHS */
-    var covMonths = []
-    uempNums.columns.forEach(m => {
-        covMonths.push(m);
-    })
-    covMonths.shift();
-    console.log(covMonths);
+    // /*CREATE LIST OF MONTHS */
+    // var covMonths = []
+    // uempNums.columns.forEach(m => {
+    //     covMonths.push(m);
+    // })
+    // covMonths.shift();
+    // console.log(covMonths);
 
-    let mdrp = document.createElement('select');
-    dd.appendChild(mdrp);
+    // let mdrp = document.createElement('select');
+    // dd.appendChild(mdrp);
 
-    /*CREATE DROP DOWN OF MONTHS */
-    covMonths.forEach(m => {
-        var el = document.createElement('option');
-        el.textContent = m;
-        el.value = m;
-        mdrp.appendChild(el);
-    });
-
-    let ut = 'Utah';
-    let utahCovNums = uempNums.filter(obj => obj.State == ut)
-    console.log(utahCovNums[0]);
-    console.log(utahNums[3]);
-    // for (const dt of stateCovidNums) {
-    //     console.log(`${dt.State} ${dt["Jan 2020"]}`);
-    // }
+    // /*CREATE DROP DOWN OF MONTHS */
+    // covMonths.forEach(m => {
+    //     var el = document.createElement('option');
+    //     el.textContent = m;
+    //     el.value = m;
+    //     mdrp.appendChild(el);
+    // });
 })
     .catch((e) => {
         console.log(e);
     });
+
+const makeStateList = () => {
+    d3.select('#stateList').selectAll('p')
+        .data(covidData)
+        .join(
+            enter => {
+                enter.append('p')
+                    .text((d, i) => d.State)
+                    .on('click', handleClick);
+            }
+        );
+}
+
+function handleClick(e, d){
+    let elem = d3.select(this); //wrap as a nice D3 object
+    elem.classed('selected', !elem.classed('selected'));
+
+    if(elem.classed('selected')){
+        let canvasWidth = parseFloat(d3.select('#canvas').style('width'));
+        let canvasHeight = parseFloat(d3.select('#canvas').style('height'));
+        let stateData = {};
+        stateData.name = d;
+        stateData.x = canvasWidth * Math.random();
+        stateData.y = canvasHeight * Math.random();
+        selectedStates.push(stateData);
+    } else { //unselected
+        selectedStates = selectedStates.filter( x => x.name != d);
+    }
+
+    console.log('clicked ', d);
+    console.log(selectedStates);
+    //updateGraph();
+}
 
