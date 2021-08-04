@@ -67,54 +67,15 @@ let stateAbrev = {
 let covidData;
 var stateList = [];
 let selectedStates = [];
+let maxValue = 1_200_000;
 Promise.all([
     d3.json("combo.json"),
-    // d3.csv("utah-history.csv"),
-    // d3.csv("unemploymentByState.csv")
 ]).then((data) => {
-    // var utahNums = files[0];
-    // var uempNums = files[1];
-
     /*GET LIST OF STATES */
     covidData = data[0];
 
-    for (const s of data[0]) {
-        stateList.push(s.State);
-    }
-
     makeStateList();
     // console.log(stateList);
-
-    /*CREATE DROP DOWN OF STATES */
-
-    // let drp = document.createElement('select');
-    // let dd = document.getElementById('dropDowns');
-    // dd.appendChild(drp);
-    // stateList.forEach(e => {
-    //     var el = document.createElement('option');
-    //     el.textContent = e;
-    //     el.value = e;
-    //     drp.appendChild(el);
-    // });
-
-    // /*CREATE LIST OF MONTHS */
-    // var covMonths = []
-    // uempNums.columns.forEach(m => {
-    //     covMonths.push(m);
-    // })
-    // covMonths.shift();
-    // console.log(covMonths);
-
-    // let mdrp = document.createElement('select');
-    // dd.appendChild(mdrp);
-
-    // /*CREATE DROP DOWN OF MONTHS */
-    // covMonths.forEach(m => {
-    //     var el = document.createElement('option');
-    //     el.textContent = m;
-    //     el.value = m;
-    //     mdrp.appendChild(el);
-    // });
 })
     .catch((e) => {
         console.log(e);
@@ -147,9 +108,45 @@ function handleClick(e, d){
     } else { //unselected
         selectedStates = selectedStates.filter( x => x.name != d);
     }
-
     console.log('clicked ', d);
     console.log(selectedStates);
     //updateGraph();
 }
 
+const updateGraph = () => {
+
+}
+
+const colorScale = d3.scaleLinear()
+                        .domain([0, maxValue])
+                        .range(['#0b661a', '#dbc70d', '#db330d'])
+
+
+// chart = {
+//     const svg = d3.select(DOM.svg(width, height))
+//         .attr("viewBox", `${-width / 2} ${-height / 2} ${width} ${height}`)
+//         .style("width", "100%")
+//         .style("height", "auto")
+//         .style("font", "10px sans-serif");
+  
+//     svg.append("g")
+//       .selectAll("g")
+//       .data(d3.stack().keys(data.columns.slice(1))(data))
+//       .join("g")
+//         .attr("fill", d => z(d.key))
+//       .selectAll("path")
+//       .data(d => d)
+//       .join("path")
+//         .attr("d", arc);
+  
+//     svg.append("g")
+//         .call(xAxis);
+  
+//     svg.append("g")
+//         .call(yAxis);
+  
+//     svg.append("g")
+//         .call(legend);
+  
+//     return svg.node();
+//   }

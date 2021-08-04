@@ -1,3 +1,9 @@
 .selected{
     background-color: lightblue;
 }
+
+#stateList {
+    max-width: 15%;
+    border: 3px double black;
+    text-align: center;
+}
