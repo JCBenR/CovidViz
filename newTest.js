@@ -136,7 +136,7 @@ Promise.all([
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     var currYear = yearData.filter(obj => { return obj.m === month; })[0];
-    var currYearData = sf[0];
+    var currYearData = sf[7];
 
     console.log(currYearData);
 
@@ -190,13 +190,15 @@ Promise.all([
         .style("fill", function (d, i) { return colors[i]; });
 
     console.log(">>>>>>>>>>");
-    console.log(typeof groups);
+    // console.log(typeof groups);
 
     var rect = groups.selectAll("rect")
-        .data(function (d) { return d; })
+        .data(function (d) {
+            console.log();
+            return d; })
         .enter()
         .append("rect")
-        .attr("x", function (d) { return x(d[0]); })
+        .attr("x", function (d) { return x(d.data.ABBR); })
         .attr("y", function (d) { return y(d[1] + d[0]); })
         .attr("height", function (d) { return y(d[1]) - y(d[1] + d[0]); })
         .attr("width", x.rangeBand())
@@ -245,6 +247,7 @@ const findEmpData = (pop, rate) => {
     rate = rate / 100;
     return pop * rate;
 }
+var colors = ["green", "yellow", "red"];
 
 const makeStateList = () => {
     d3.select('#stateList').selectAll('p')
