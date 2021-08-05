@@ -3,6 +3,9 @@ let changeTitle = () => {
 }
 changeTitle();
 
+let months = ["Jan 2020", "Feb 2020", "Mar 2020", "Apr 2020", "May 2020", "Jun 2020", "Jul 2020", "Aug 2020", 
+    "Sep 2020", "Oct 2020", "Nov 2020", "Dec 2020", "Jan 2021", "Feb 2021", "Mar 2021", "Apr 2021", "May 2021", "June 2021"];
+
 let stateAbrev = {
     "AL": "Alabama",
     "AK": "Alaska",
@@ -76,8 +79,11 @@ Promise.all([
 ]).then((data) => {
     /*GET LIST OF STATES */
     covidData = data[0];
+    console.log(covidData[1]);
+
 
     makeStateList();
+    var states = parseStates(covidData);
     // console.log(stateList);
 
 })
@@ -97,6 +103,35 @@ const makeStateList = () => {
         );
 }
 
+function parseStates(data){
+    var states = [];
+    for(let i = 0; i < 51; i++){
+        states.push(data[i].State);
+    }
+    return states;
+}
+
+function parseUnemploymentRate(data, months){
+    var unemploymentRates = [];
+    for(let i = 0; i < 51; i++){
+        for(let j = 0; j < 18; j++){
+            covidCases.push(data[months[j]]);
+        }
+    }
+    return covidCases;
+}
+
+function parseCovidCases(data, months){
+    var covidCases = {};
+    for(let i = 0; i < 51; i++){
+        for(let j = 0; j < 18; j++){
+            covidCases.push(data[months[j]]);
+
+        }
+    }
+    return covidCases;
+}
+
 function handleClick(e, d){
     let elem = d3.select(this); //wrap as a nice D3 object
     elem.classed('selected', !elem.classed('selected'));
@@ -109,11 +144,12 @@ function handleClick(e, d){
         stateData.x = canvasWidth * Math.random();
         stateData.y = canvasHeight * Math.random();
         selectedStates.push(stateData);
+        console.log(covidData.AK);
     } else { //unselected
         selectedStates = selectedStates.filter( x => x.name != d);
     }
     console.log('clicked ', d);
-    console.log(selectedStates);
+    console.log(selectedStates)
     updateGraph();
 }
 
@@ -132,7 +168,7 @@ let bars = () => canvas.selectAll("rect")
                 .enter()
                     .append("rect")
                     .attr("width", 25)
-                    .attr("height", 100)
+                    .attr("height", 200)
                     .attr("fill", function(d) {return colorScale(d);}     
                     )
 
