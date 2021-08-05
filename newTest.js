@@ -122,11 +122,11 @@ Promise.all([
         sf.push(dsf);
     });
 
-    console.log(sf[0]);
     var margin = { top: 20, right: 20, bottom: 70, left: 40 },
         width = 600 - margin.left - margin.right,
         height = 300 - margin.top - margin.bottom;
 
+    
     var svg = d3.select("canvas")
         .append("svg")
         .attr("width", width + margin.left + margin.right)
@@ -135,13 +135,26 @@ Promise.all([
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     var currYear = yearData.filter(obj => { return obj.m === month; })[0];
+    var currYearData = sf[0];
+    console.log(currYearData);
     var x = d3.scaleBand()
-        .domain(sf[0][0].map(function(d) { return d.data.ABBR; }))
+        .domain(currYearData[0].map(function(d) { return d.data.ABBR;}))
         .range([margin.left, width - margin.right])
 
     var y = d3.scaleLinear()
-        .domain([0, d3.max(sf[0], d => {return d3.max(d, (d) => { return d[1] + d[0]; });})]).nice()
+        .domain([0, d3.max(currYearData, (d) => {  
+            return d3.max(d, (d) => { 
+                return parseInt(d[1]) + parseInt(d[0]); 
+            });  
+        })]).nice()
         .range([height - margin.bottom, margin.top])
+
+    console.log("********");
+    console.log(d3.max(currYearData, (d) => {  
+            return d3.max(d, (d) => { 
+                return parseInt(d[1]) + parseInt(d[0]); 
+            });  
+        }));
 
     var xAxis = g => g
         .attr("transform", `translate(0,${height - margin.bottom})`)
