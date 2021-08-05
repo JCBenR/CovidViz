@@ -113,7 +113,7 @@ Promise.all([
         yearData.push(yrObj);
     })
     // console.log(yearData.filter(obj => {return obj.m === month;})[0]);
-    console.log(yearData);
+    //console.log(yearData);
     const dataStack = d3.stack().keys(["Cases", "UnEmp", "Pop"]);
     let sf = [];
     yearData.forEach(e => {
@@ -122,7 +122,7 @@ Promise.all([
         sf.push(dsf);
     });
 
-    console.log(sf);
+    console.log(sf[0]);
     var margin = { top: 20, right: 20, bottom: 70, left: 40 },
         width = 600 - margin.left - margin.right,
         height = 300 - margin.top - margin.bottom;
@@ -136,9 +136,29 @@ Promise.all([
 
     var currYear = yearData.filter(obj => { return obj.m === month; })[0];
     var x = d3.scaleBand()
-        .domain(currYear.ABBR)
-        .range([0, 100])
+        .domain(sf[0][0].map(function(d) { return d.data.ABBR; }))
+        .range([margin.left, width - margin.right])
 
+    var y = d3.scaleLinear()
+        .domain([0, d3.max(sf[0], d => {return d3.max(d, (d) => { return d[1] + d[0]; });})]).nice()
+        .range([height - margin.bottom, margin.top])
+
+    var xAxis = g => g
+        .attr("transform", `translate(0,${height - margin.bottom})`)
+        .call(d3.axisBottom(x).tickFormat(i => sf[0][i].name).tickSizeOuter(0))
+
+    var yAxis = g => g
+        .attr("transform", `translate(${margin.left},0)`)
+        .call(d3.axisLeft(y).ticks(null, sf.format))
+        .call(g => g.select(".domain").remove())
+        .call(g => g.append("text")
+            .attr("x", -margin.left)
+            .attr("y", 10)
+            .attr("fill", "currentColor")
+            .attr("text-anchor", "start")
+            .text(sf.y));
+
+    
 })
     .catch((e) => {
         for (const x of Object.entries(e)) {
