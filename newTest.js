@@ -123,7 +123,7 @@ Promise.all([
     });
 
     var margin = { top: 20, right: 20, bottom: 70, left: 40 },
-        width = 600 - margin.left - margin.right,
+        width = 900 - margin.left - margin.right,
         height = 750 - margin.top - margin.bottom;
 
 
@@ -136,7 +136,7 @@ Promise.all([
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     var currYear = yearData.filter(obj => { return obj.m === month; })[0];
-    var currYearData = sf[7];
+    var currYearData = sf[10];
 
     console.log(currYearData);
 
@@ -183,10 +183,10 @@ Promise.all([
         .attr("transform", "translate(0," + height + ")")
         .call(xAxis);
 
-    var groups = svg.selectAll("g.state")
+    var groups = svg.selectAll("g.cat")
         .data(currYearData)
         .enter().append("g")
-        .attr("class", "state")
+        .attr("class", "cat")
         .style("fill", function (d, i) { return colors[i]; });
 
     console.log(">>>>>>>>>>");
@@ -199,18 +199,33 @@ Promise.all([
         .enter()
         .append("rect")
         .attr("x", function (d) { return x(d.data.ABBR); })
-        .attr("y", function (d) { return y(d[1] + d[0]); })
-        .attr("height", function (d) { return y(d[1]) - y(d[1] + d[0]); })
-        .attr("width", x.rangeBand())
-        .on("mouseover", function () { tooltip.style("display", null); })
-        .on("mouseout", function () { tooltip.style("display", "none"); })
-        .on("mousemove", function (d) {
-            var xPosition = d3.mouse(this)[0] - 15;
-            var yPosition = d3.mouse(this)[1] - 25;
-            tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
-            tooltip.select("text").text(d[0]);
+        .attr("y", d => y(d[1])) //function (d) { return y(d[1] + d[0]); })
+        .attr("height", d => y(d[0]) - y(d[1])) //function (d) { return y(d[1]) - y(d[1] + d[0]); })
+        .attr("width", x.bandwidth())
+        .on("mouseover", function(d) {
+            tooltip.style("display", null);
+            div.transition()
+              .duration(200)
+              .style("opacity", .9);
+            div.html(d.data.cases + "<br/>" + d.data.rate)
+              .style("left", (d3.event.pageX) + "px")
+              .style("top", (d3.event.pageY - 28) + "px");
+            })
+          .on("mouseout", function(d) {
+            tooltip.style("display", "none");
+            div.transition()
+              .duration(500)
+              .style("opacity", 0);
+        // .on("mouseover", function () { tooltip.style("display", null); })
+        // .on("mouseout", function () { tooltip.style("display", "none"); })
+        // .on("mousemove", function (d) {
+        //     var xPosition = d3.mouse(this)[0] - 15;
+        //     var yPosition = d3.mouse(this)[1] - 25;
+        //     tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
+        //     tooltip.select("text").text(d[0]);
         });
 
+    
     var tooltip = svg.append("g")
         .attr("class", "tooltip")
         .style("display", "none");
@@ -218,8 +233,8 @@ Promise.all([
     tooltip.append("rect")
         .attr("width", 30)
         .attr("height", 20)
-        .attr("fill", "white")
-        .style("opacity", 0.5);
+        .attr("fill", "black")
+        .style("opacity", .5);
 
     tooltip.append("text")
         .attr("x", 15)
