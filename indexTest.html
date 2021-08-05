@@ -55,7 +55,7 @@
     });
 
     // Scale the range of the data in the domains
-    x.domain(data.map(function(d) { return d.State; }));
+    x.domain(data.map(function(d) { return d.ABBR; }));
     y.domain([0, d3.max(data, function(d) { return d.Jan2020; })]);
 
     // Append rectangles for bar chart
@@ -63,7 +63,7 @@
         .data(data)
       .enter().append("rect")
         .attr("class", "bar")
-        .attr("x", function(d) { return x(d.State); })
+        .attr("x", function(d) { return x(d.ABBR); })
         .attr("width", x.bandwidth())
         .attr("y", function(d) { return y(d.Jan2020); })
         .attr("height", function(d) { return height - y(d.Jan2020); 
