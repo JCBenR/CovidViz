@@ -73,26 +73,58 @@ let selectedStates = [];
 let maxValue = 1_200_000;
 let width = 600;
 let height = 600;
+let month = months[0];
+let states;
 
 Promise.all([
     d3.json("combo.json"),
 ]).then((data) => {
     /*GET LIST OF STATES */
     covidData = data[0];
-    console.log(covidData[1]);
 
 
     makeStateList();
-    var states = parseStates(covidData);
+    states = parseStates(covidData);
     // console.log(stateList);
 
+    //console.log(Object.keys(stateAbrev));
+let yearData = [];
+    months.forEach(m => {
+        let yrObj = {
+            m: m,
+            data: []
+        }
+        for (const x of covidData) {
+            try {
+                let newObj = {
+                    State: x.State,
+                    Pop: x.Population,
+                    Cases: x.data[m][0],
+                    Rate: x.data[m][1]
+                }
+                yrObj.data.push(newObj);
+                // console.log(newObj);
+            } catch (error) {
+                // console.log(error);
+            }
+        }
+        yearData.push(yrObj); 
+    })
+    console.log(yearData);
+    // var dataset = d3.stack()(Object.keys(stateAbrev).map(function(newData) {
+        
+    //     return covidData.map(function(d) {
+    //         console.log(month);
+    //         console.log(d.data[month][0]);
+    //         //return {x: d.data[month][0], y: +d[newData]};
+    //     });
+    //     }));
 })
     .catch((e) => {
-        console.log(e);
+        console.error(e);
     });
 
-// let series = d3.stack()
-//                 .keys(data.)
+
 
 const makeStateList = () => {
     d3.select('#stateList').selectAll('p')
@@ -206,33 +238,37 @@ const selectAll = (e) => {
     }
 }
 
+var tooltip = d3.select("#canvas")
+    .append("div")
+    .style("opacity", 0)
+    .attr("class", "tooltip")
+    .style("background-color", "white")
+    .style("border", "solid")
+    .style("border-width", "1px")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
 
 
-// chart = {
-//     const svg = d3.select(DOM.svg(width, height))
-//         .attr("viewBox", `${-width / 2} ${-height / 2} ${width} ${height}`)
-//         .style("width", "100%")
-//         .style("height", "auto")
-//         .style("font", "10px sans-serif");
+var mouseover = function(d) {
+    tooltip.style("opacity", 1)
+}
 
-//     svg.append("g")
-//       .selectAll("g")
-//       .data(d3.stack().keys(data.columns.slice(1))(data))
-//       .join("g")
-//         .attr("fill", d => z(d.key))
-//       .selectAll("path")
-//       .data(d => d)
-//       .join("path")
-//         .attr("d", arc);
+var mousemove = function(d) {
+    tooltip.html(`State: ${d.State} <br/>
+                Population: ${d.Population} <br/>
+                Cases: ${d.data[month][0]} <br/>
+                UnEmp Rate: ${d.data[month][1]}`
+        // "State: " + d.State + <br/> +
+        //     "Population: " + d.Population + <br/> +
+        //     "Cases: " + d.data[month][0] + <br/> +
+        //     "UnEmp Rate: " + d.data[month][1]     
+      )
+      .style("left", (d3.mouse(this)[0]+90) + "px") // It is important to put the +90: other wise the tooltip is exactly where the point is an it creates a weird effect
+      .style("top", (d3.mouse(this)[1]) + "px")
+  }
 
-//     svg.append("g")
-//         .call(xAxis);
-
-//     svg.append("g")
-//         .call(yAxis);
-
-//     svg.append("g")
-//         .call(legend);
-
-//     return svg.node();
-//   }
+  var mouseleave = function(d) {
+    tooltip.transition()
+      .duration(200)
+      .style("opacity", 0)
+  }
