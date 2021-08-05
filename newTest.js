@@ -101,6 +101,7 @@ Promise.all([
                     ABBR: x.ABBR,
                     Pop: parseInt(x.Population.replace(/,/g, '')),
                     Cases: x.data[m][0],
+                    //CasePer: ,
                     Rate: x.data[m][1],
                     UnEmp: Math.ceil(findEmpData(x.Population, x.data[m][1]))
                 }
@@ -114,7 +115,7 @@ Promise.all([
     })
     // console.log(yearData.filter(obj => {return obj.m === month;})[0]);
     //console.log(yearData);
-    const dataStack = d3.stack().keys(["Cases", "UnEmp", "Pop"]);
+    const dataStack = d3.stack().keys(["Cases", "UnEmp"]);
     let sf = [];
     yearData.forEach(e => {
 
@@ -136,6 +137,7 @@ Promise.all([
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     var currYear = yearData.filter(obj => { return obj.m === month; })[0];
+    
     var currYearData = sf[10];
 
     console.log(currYearData);
