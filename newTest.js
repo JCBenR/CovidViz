@@ -74,6 +74,7 @@ let maxValue = 1_200_000;
 let month = months[0];
 let states;
 let monthIdx = 0;
+let yearData = [];
 
 Promise.all([
     d3.json("combo.json"),
@@ -89,18 +90,32 @@ Promise.all([
 
     var ddMonth = document.getElementById("monthDD");
     ddMonth.addEventListener("change", () => {
-        console.log(ddMonth);
         monthIdx = months.indexOf(ddMonth.value);
-        console.log(monthIdx);
+        drawGraph();
     })
+})
+.catch((e) => {
+    for (const x of Object.entries(e)) {
+        console.error(x);
+    }
+    //console.error(typeof e);
+});
 
-    let yearData = [];
-    months.forEach(m => {
+async function drawGraph(){
+    // console.log(selectedStates);
+    // console.log(covidData);
+    try {
+        d3.select("svg").remove();
+    } catch (error) {
+        console.error(error);
+    }
+    yearData = [];
+    await months.forEach(m => {
         let yrObj = {
             m: m,
             data: []
         }
-        for (const x of covidData) {
+        for (const x of selectedStates) {
             try {
                 let newObj = {
                     State: x.State,
@@ -119,11 +134,11 @@ Promise.all([
         }
         yearData.push(yrObj);
     })
-    // console.log(yearData.filter(obj => {return obj.m === month;})[0]);
-    //console.log(yearData);
+    console.log(yearData.filter(obj => {return obj.m === month;})[0]);
+    // console.log(yearData);
     const dataStack = d3.stack().keys(["Cases", "UnEmp"]);
     let sf = [];
-    yearData.forEach(e => {
+    await yearData.forEach(e => {
 
         let dsf = dataStack(e.data);
         sf.push(dsf);
@@ -144,7 +159,7 @@ Promise.all([
 
     var currYear = yearData.filter(obj => { return obj.m === month; })[0];
 
-    var currYearData = sf[10]; //change this to monthIdx when working
+    var currYearData = sf[monthIdx]; //change this to monthIdx when working
 
     console.log(currYearData);
 
@@ -207,58 +222,45 @@ Promise.all([
         })
         .enter()
         .append("rect")
-        .attr("x", function (d) { return x(d.data.ABBR); })
+        .attr("x", function (d) { console.log(d);
+            return x(d.data.ABBR);})
         .attr("y", d => y(d[1])) //function (d) { return y(d[1] + d[0]); })
         .attr("height", d => y(d[0]) - y(d[1])) //function (d) { return y(d[1]) - y(d[1] + d[0]); })
         .attr("width", x.bandwidth())
-        .on("mouseover", function (d) {
-            tooltip.style("display", null);
-            div.transition()
-                .duration(200)
-                .style("opacity", .9);
-            div.html(d.data.cases + "<br/>" + d.data.rate)
-                .style("left", (d3.event.pageX) + "px")
-                .style("top", (d3.event.pageY - 28) + "px");
-        })
-        .on("mouseout", function (d) {
-            tooltip.style("display", "none");
-            div.transition()
-                .duration(500)
-                .style("opacity", 0);
-            // .on("mouseover", function () { tooltip.style("display", null); })
-            // .on("mouseout", function () { tooltip.style("display", "none"); })
-            // .on("mousemove", function (d) {
-            //     var xPosition = d3.mouse(this)[0] - 15;
-            //     var yPosition = d3.mouse(this)[1] - 25;
-            //     tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
-            //     tooltip.select("text").text(d[0]);
-        });
+    //     .on("mouseover", function (d) {
+    //         tooltip.style("display", null);
+    //         div.transition()
+    //             .duration(200)
+    //             .style("opacity", .9);
+    //         div.html(d.data.cases + "<br/>" + d.data.rate)
+    //             .style("left", (d3.event.pageX) + "px")
+    //             .style("top", (d3.event.pageY - 28) + "px");
+    //     })
+    //     .on("mouseout", function (d) {
+    //         tooltip.style("display", "none");
+    //         div.transition()
+    //             .duration(500)
+    //             .style("opacity", 0);
+    //     });
 
 
-    var tooltip = svg.append("g")
-        .attr("class", "tooltip")
-        .style("display", "none");
+    // var tooltip = svg.append("g")
+    //     .attr("class", "tooltip")
+    //     .style("display", "none");
 
-    tooltip.append("rect")
-        .attr("width", 30)
-        .attr("height", 20)
-        .attr("fill", "black")
-        .style("opacity", .5);
+    // tooltip.append("rect")
+    //     .attr("width", 30)
+    //     .attr("height", 20)
+    //     .attr("fill", "black")
+    //     .style("opacity", .5);
 
-    tooltip.append("text")
-        .attr("x", 15)
-        .attr("dy", "1.2em")
-        .style("text-anchor", "middle")
-        .attr("font-size", "12px")
-        .attr("font-weight", "bold");
-})
-    .catch((e) => {
-        for (const x of Object.entries(e)) {
-            console.error(x);
-        }
-        //console.error(typeof e);
-    });
-
+    // tooltip.append("text")
+    //     .attr("x", 15)
+    //     .attr("dy", "1.2em")
+    //     .style("text-anchor", "middle")
+    //     .attr("font-size", "12px")
+    //     .attr("font-weight", "bold");
+};
 
 /**
  * function transforms population from string to number, then changes rate to percent decimal (ie, 5.1 >> .0051), then multiplies the two to get the total number of unemployed in the state
@@ -293,28 +295,29 @@ function handleClick(e, d) {
         let canvasWidth = parseFloat(d3.select('#canvas').style('width'));
         let canvasHeight = parseFloat(d3.select('#canvas').style('height'));
         let stateData = {};
-        stateData.name = d;
+        stateData = d;
         stateData.x = canvasWidth * Math.random();
         stateData.y = canvasHeight * Math.random();
         selectedStates.push(stateData);
         //console.log(covidData.AK);
     } else { //unselected
-        selectedStates = selectedStates.filter(x => x.name != d);
+        selectedStates = selectedStates.filter(x => x != d);
     }
     console.log('clicked ', d);
     console.log(selectedStates)
-    //updateGraph();
+    drawGraph();
 }
 
 function selectAllStates(e) {
     if (e.className === "selectAll") {
-        selectedStates = [...covidData];
+        selectedStates = covidData;
         let sl = document.getElementById("stateList").getElementsByTagName("p");
         for (const x of sl) {
             x.className = "selected";
         }
         e.innerHTML = "Deselect All";
         e.className = "deselectAll";
+        drawGraph();
     }
     else {
         selectedStates = [];
@@ -324,7 +327,9 @@ function selectAllStates(e) {
         }
         e.innerHTML = "Select All";
         e.className = "selectAll";
+        drawGraph();
     }
+    
 }
 
 function createMonthDropDown() {
