@@ -96,8 +96,6 @@ function getStateData() {
             m: m,
             data: []
         }
-        console.log("RUNNING!!!");
-        console.log(selectedStates);
         for (const x of selectedStates) {
             try {
                 let newObj = {
@@ -111,12 +109,11 @@ function getStateData() {
                 }
                 yrObj.data.push(newObj);
             } catch (error) {
-                console.log(error);
+                console.error(error);
             }
         }
         yearData.push(yrObj);
     })
-    console.log(yearData);
     stackData();
 };
 
@@ -129,6 +126,7 @@ var margin, width, height;
 var svg;
 let sf = [];
 function stackData() {
+    
     const dataStack = d3.stack().keys(["Cases", "UnEmp"]);
     yearData.forEach(e => {
 
@@ -213,35 +211,34 @@ function makeScale(){
             console.log();
             return d;
         })
-        .enter()
-        .append("rect")
-        .attr("x", function (d) { return x(d.data.ABBR); })
-        .attr("y", d => y(d[1])) //function (d) { return y(d[1] + d[0]); })
-        .attr("height", d => y(d[0]) - y(d[1])) //function (d) { return y(d[1]) - y(d[1] + d[0]); })
-        .attr("width", x.bandwidth())
-        .on("mouseover", function (d) {
-            tooltip.style("display", null);
-            div.transition()
-                .duration(200)
-                .style("opacity", .9);
-            div.html(d.data.cases + "<br/>" + d.data.rate)
-                .style("left", (d3.event.pageX) + "px")
-                .style("top", (d3.event.pageY - 28) + "px");
-        })
-        .on("mouseout", function (d) {
-            tooltip.style("display", "none");
-            div.transition()
-                .duration(500)
-                .style("opacity", 0);
-            // .on("mouseover", function () { tooltip.style("display", null); })
-            // .on("mouseout", function () { tooltip.style("display", "none"); })
-            // .on("mousemove", function (d) {
-            //     var xPosition = d3.mouse(this)[0] - 15;
-            //     var yPosition = d3.mouse(this)[1] - 25;
-            //     tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
-            //     tooltip.select("text").text(d[0]);
+        .join(enter => {
+            enter.append("rect")
+            .attr("x", function (d) { return x(d.data.ABBR); })
+            .attr("y", d => y(d[1])) //function (d) { return y(d[1] + d[0]); })
+            .attr("height", d => y(d[0]) - y(d[1])) //function (d) { return y(d[1]) - y(d[1] + d[0]); })
+            .attr("width", x.bandwidth())
+            .on("mouseover", function (d) {
+                tooltip.style("display", null);
+                div.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                div.html(d.data.cases + "<br/>" + d.data.rate)
+                    .style("left", (d3.event.pageX) + "px")
+                    .style("top", (d3.event.pageY - 28) + "px");
+            })
+            .on("mouseout", function (d) {
+                tooltip.style("display", "none");
+                div.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+            })
+        }, 
+        // update => {
+        //     update.call(getStateData);
+        // }, 
+        exit => {
+            exit.remove();
         });
-
 
     var tooltip = svg.append("g")
         .attr("class", "tooltip")
