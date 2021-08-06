@@ -71,10 +71,9 @@ let covidData;
 var stateList = [];
 let selectedStates = [];
 let maxValue = 1_200_000;
-// let width = 600;
-// let height = 600;
 let month = months[0];
 let states;
+let monthIdx = 0;
 
 Promise.all([
     d3.json("combo.json"),
@@ -84,9 +83,16 @@ Promise.all([
 
     // console.log(data[0][0]);
     makeStateList();
+    createMonthDropDown();
     //var states = parseStates(covidData);
     // console.log(stateList);
 
+    var ddMonth = document.getElementById("monthDD");
+    ddMonth.addEventListener("change", () => {
+        console.log(ddMonth);
+        monthIdx = months.indexOf(ddMonth.value);
+        console.log(monthIdx);
+    })
 
     let yearData = [];
     months.forEach(m => {
@@ -137,8 +143,8 @@ Promise.all([
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     var currYear = yearData.filter(obj => { return obj.m === month; })[0];
-    
-    var currYearData = sf[10];
+
+    var currYearData = sf[10]; //change this to monthIdx when working
 
     console.log(currYearData);
 
@@ -197,37 +203,38 @@ Promise.all([
     var rect = groups.selectAll("rect")
         .data(function (d) {
             console.log();
-            return d; })
+            return d;
+        })
         .enter()
         .append("rect")
         .attr("x", function (d) { return x(d.data.ABBR); })
         .attr("y", d => y(d[1])) //function (d) { return y(d[1] + d[0]); })
         .attr("height", d => y(d[0]) - y(d[1])) //function (d) { return y(d[1]) - y(d[1] + d[0]); })
         .attr("width", x.bandwidth())
-        .on("mouseover", function(d) {
+        .on("mouseover", function (d) {
             tooltip.style("display", null);
             div.transition()
-              .duration(200)
-              .style("opacity", .9);
+                .duration(200)
+                .style("opacity", .9);
             div.html(d.data.cases + "<br/>" + d.data.rate)
-              .style("left", (d3.event.pageX) + "px")
-              .style("top", (d3.event.pageY - 28) + "px");
-            })
-          .on("mouseout", function(d) {
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px");
+        })
+        .on("mouseout", function (d) {
             tooltip.style("display", "none");
             div.transition()
-              .duration(500)
-              .style("opacity", 0);
-        // .on("mouseover", function () { tooltip.style("display", null); })
-        // .on("mouseout", function () { tooltip.style("display", "none"); })
-        // .on("mousemove", function (d) {
-        //     var xPosition = d3.mouse(this)[0] - 15;
-        //     var yPosition = d3.mouse(this)[1] - 25;
-        //     tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
-        //     tooltip.select("text").text(d[0]);
+                .duration(500)
+                .style("opacity", 0);
+            // .on("mouseover", function () { tooltip.style("display", null); })
+            // .on("mouseout", function () { tooltip.style("display", "none"); })
+            // .on("mousemove", function (d) {
+            //     var xPosition = d3.mouse(this)[0] - 15;
+            //     var yPosition = d3.mouse(this)[1] - 25;
+            //     tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
+            //     tooltip.select("text").text(d[0]);
         });
 
-    
+
     var tooltip = svg.append("g")
         .attr("class", "tooltip")
         .style("display", "none");
@@ -278,6 +285,64 @@ const makeStateList = () => {
         );
 }
 
+function handleClick(e, d) {
+    let elem = d3.select(this); //wrap as a nice D3 object
+    elem.classed('selected', !elem.classed('selected'));
+
+    if (elem.classed('selected')) {
+        let canvasWidth = parseFloat(d3.select('#canvas').style('width'));
+        let canvasHeight = parseFloat(d3.select('#canvas').style('height'));
+        let stateData = {};
+        stateData.name = d;
+        stateData.x = canvasWidth * Math.random();
+        stateData.y = canvasHeight * Math.random();
+        selectedStates.push(stateData);
+        //console.log(covidData.AK);
+    } else { //unselected
+        selectedStates = selectedStates.filter(x => x.name != d);
+    }
+    console.log('clicked ', d);
+    console.log(selectedStates)
+    //updateGraph();
+}
+
+function selectAllStates(e) {
+    if (e.className === "selectAll") {
+        selectedStates = [...covidData];
+        let sl = document.getElementById("stateList").getElementsByTagName("p");
+        for (const x of sl) {
+            x.className = "selected";
+        }
+        e.innerHTML = "Deselect All";
+        e.className = "deselectAll";
+    }
+    else {
+        selectedStates = [];
+        let sl = document.getElementById("stateList").getElementsByTagName("p");
+        for (const x of sl) {
+            x.className = "";
+        }
+        e.innerHTML = "Select All";
+        e.className = "selectAll";
+    }
+}
+
+function createMonthDropDown() {
+    let dd = document.getElementById('dropDowns');
+    let mdrp = document.createElement('select');
+    mdrp.setAttribute('id', 'monthDD');
+    dd.appendChild(mdrp);
+
+    /*CREATE DROP DOWN OF MONTHS */
+    months.forEach(m => {
+        var el = document.createElement('option');
+        el.textContent = m;
+        el.value = m;
+        mdrp.appendChild(el);
+    });
+
+}
+
 function parseStates(data) {
     var states = [];
     for (let i = 0; i < 51; i++) {
@@ -306,109 +371,3 @@ function parseCovidCases(data, months) {
     }
     return covidCases;
 }
-
-function handleClick(e, d) {
-    let elem = d3.select(this); //wrap as a nice D3 object
-    elem.classed('selected', !elem.classed('selected'));
-
-    if (elem.classed('selected')) {
-        let canvasWidth = parseFloat(d3.select('#canvas').style('width'));
-        let canvasHeight = parseFloat(d3.select('#canvas').style('height'));
-        let stateData = {};
-        stateData.name = d;
-        stateData.x = canvasWidth * Math.random();
-        stateData.y = canvasHeight * Math.random();
-        selectedStates.push(stateData);
-        //console.log(covidData.AK);
-    } else { //unselected
-        selectedStates = selectedStates.filter(x => x.name != d);
-    }
-    console.log('clicked ', d);
-    console.log(selectedStates)
-    //updateGraph();
-}
-
-// const updateGraph = () => {
-//     console.log("updating...");
-//     bars();
-// }
-
-// let canvas = d3.select("#canvas")
-//     .append("svg")
-//     .attr("width", width)
-//     .attr("height", height);
-
-// let bars = () => canvas.selectAll("rect")
-
-//     .data(selectedStates)
-//     .enter()
-//     .append("rect")
-//     .attr("width", 25)
-//     .attr("height", 200)
-//     .attr("fill", function (d) { return colorScale(d); }
-//     )
-
-
-const colorScale = d3.scaleLinear()
-    .domain([0, maxValue])
-    .range(['#0b661a', '#dbc70d', '#db330d'])
-
-// const widthScale = d3.scaleLinear()
-//     .domain([50, maxValue])
-//     .range([0, width]);
-
-function selectAllStates(e) {
-    if (e.className === "selectAll") {
-        selectedStates = [...covidData];
-        let sl = document.getElementById("stateList").getElementsByTagName("p");
-        for (const x of sl) {
-            x.className = "selected";
-        }
-        e.innerHTML = "Deselect All";
-        e.className = "deselectAll";
-    }
-    else {
-        selectedStates = [];
-        let sl = document.getElementById("stateList").getElementsByTagName("p");
-        for (const x of sl) {
-            x.className = "";
-        }
-        e.innerHTML = "Select All";
-        e.className = "selectAll";
-    }
-}
-
-// var tooltip = d3.select("#canvas")
-//     .append("div")
-//     .style("opacity", 0)
-//     .attr("class", "tooltip")
-//     .style("background-color", "white")
-//     .style("border", "solid")
-//     .style("border-width", "1px")
-//     .style("border-radius", "5px")
-//     .style("padding", "10px")
-
-
-// var mouseover = function (d) {
-//     tooltip.style("opacity", 1)
-// }
-
-// var mousemove = function (d) {
-//     tooltip.html(`State: ${d.State} <br/>
-//                 Population: ${d.Population} <br/>
-//                 Cases: ${d.data[month][0]} <br/>
-//                 UnEmp Rate: ${d.data[month][1]}`
-//         // "State: " + d.State + <br/> +
-//         //     "Population: " + d.Population + <br/> +
-//         //     "Cases: " + d.data[month][0] + <br/> +
-//         //     "UnEmp Rate: " + d.data[month][1]     
-//     )
-//         .style("left", (d3.mouse(this)[0] + 90) + "px") // It is important to put the +90: other wise the tooltip is exactly where the point is an it creates a weird effect
-//         .style("top", (d3.mouse(this)[1]) + "px")
-// }
-
-// var mouseleave = function (d) {
-//     tooltip.transition()
-//         .duration(200)
-//         .style("opacity", 0)
-// }
