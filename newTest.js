@@ -71,8 +71,6 @@ let covidData;
 var stateList = [];
 let selectedStates = [];
 let maxValue = 1_200_000;
-// let width = 600;
-// let height = 600;
 let month = months[0];
 let states;
 
@@ -126,7 +124,7 @@ var margin, width, height;
 var svg;
 let sf = [];
 function stackData() {
-    
+    console.log(yearData);
     const dataStack = d3.stack().keys(["Cases", "UnEmp"]);
     yearData.forEach(e => {
 
