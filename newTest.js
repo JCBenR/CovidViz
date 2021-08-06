@@ -1,5 +1,5 @@
 let changeTitle = () => {
-    document.getElementById("Title").innerHTML = "New Stats";
+    document.getElementById("Title").innerHTML = "Covid and Unemployment Numbers by State";
 }
 changeTitle();
 
@@ -79,15 +79,10 @@ let yearData = [];
 Promise.all([
     d3.json("combo.json"),
 ]).then((data) => {
-    /*GET LIST OF STATES */
-    covidData = data[0];
-
-    // console.log(data[0][0]);
+     covidData = data[0];
     makeStateList();
     createMonthDropDown();
-    //var states = parseStates(covidData);
-    // console.log(stateList);
-
+    
     var ddMonth = document.getElementById("monthDD");
     ddMonth.addEventListener("change", () => {
         monthIdx = months.indexOf(ddMonth.value);
@@ -98,17 +93,17 @@ Promise.all([
     for (const x of Object.entries(e)) {
         console.error(x);
     }
-    //console.error(typeof e);
 });
 
 async function drawGraph(){
-    // console.log(selectedStates);
-    // console.log(covidData);
     try {
         d3.select("svg").remove();
     } catch (error) {
         console.error(error);
     }
+    
+
+
     yearData = [];
     await months.forEach(m => {
         let yrObj = {
@@ -127,15 +122,12 @@ async function drawGraph(){
                     UnEmp: Math.ceil(findEmpData(x.Population, x.data[m][1]))
                 }
                 yrObj.data.push(newObj);
-                // console.log(newObj);
             } catch (error) {
-                // console.log(error);
             }
         }
         yearData.push(yrObj);
     })
     console.log(yearData.filter(obj => {return obj.m === month;})[0]);
-    // console.log(yearData);
     const dataStack = d3.stack().keys(["Cases", "UnEmp"]);
     let sf = [];
     await yearData.forEach(e => {
@@ -145,9 +137,8 @@ async function drawGraph(){
     });
 
     var margin = { top: 20, right: 20, bottom: 70, left: 40 },
-        width = 900 - margin.left - margin.right,
+        width = 1050 - margin.left - margin.right,
         height = 750 - margin.top - margin.bottom;
-
 
 
     var svg = d3.select("#canvas")
@@ -156,10 +147,18 @@ async function drawGraph(){
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        
+    var labelGroup = svg.append("g").attr("id", "legend2");
+    labelGroup.append("circle").attr("cx",200).attr("cy",130).attr("r", 6).style("fill", "red")
+    labelGroup.append("circle").attr("cx",200).attr("cy",160).attr("r", 6).style("fill", "blue")
+    labelGroup.append("text").attr("x", 220).attr("y", 130).text("Number of Unemployed").style("font-size", "15px").attr("alignment-baseline","middle")
+    labelGroup.append("text").attr("x", 220).attr("y", 160).text("Number of Covid Cases").style("font-size", "15px").attr("alignment-baseline","middle")
+    labelGroup.attr("transform", "translate(" + (margin.left + 570)  + "," + (margin.top - 150) + ")");
+
 
     var currYear = yearData.filter(obj => { return obj.m === month; })[0];
 
-    var currYearData = sf[monthIdx]; //change this to monthIdx when working
+    var currYearData = sf[monthIdx];
 
     console.log(currYearData);
 
@@ -224,42 +223,9 @@ async function drawGraph(){
         .append("rect")
         .attr("x", function (d) { console.log(d);
             return x(d.data.ABBR);})
-        .attr("y", d => y(d[1])) //function (d) { return y(d[1] + d[0]); })
-        .attr("height", d => y(d[0]) - y(d[1])) //function (d) { return y(d[1]) - y(d[1] + d[0]); })
+        .attr("y", d => y(d[1]))
+        .attr("height", d => y(d[0]) - y(d[1])) 
         .attr("width", x.bandwidth())
-    //     .on("mouseover", function (d) {
-    //         tooltip.style("display", null);
-    //         div.transition()
-    //             .duration(200)
-    //             .style("opacity", .9);
-    //         div.html(d.data.cases + "<br/>" + d.data.rate)
-    //             .style("left", (d3.event.pageX) + "px")
-    //             .style("top", (d3.event.pageY - 28) + "px");
-    //     })
-    //     .on("mouseout", function (d) {
-    //         tooltip.style("display", "none");
-    //         div.transition()
-    //             .duration(500)
-    //             .style("opacity", 0);
-    //     });
-
-
-    // var tooltip = svg.append("g")
-    //     .attr("class", "tooltip")
-    //     .style("display", "none");
-
-    // tooltip.append("rect")
-    //     .attr("width", 30)
-    //     .attr("height", 20)
-    //     .attr("fill", "black")
-    //     .style("opacity", .5);
-
-    // tooltip.append("text")
-    //     .attr("x", 15)
-    //     .attr("dy", "1.2em")
-    //     .style("text-anchor", "middle")
-    //     .attr("font-size", "12px")
-    //     .attr("font-weight", "bold");
 };
 
 /**
@@ -273,7 +239,7 @@ const findEmpData = (pop, rate) => {
     rate = rate / 100;
     return pop * rate;
 }
-var colors = ["green", "yellow", "red"];
+var colors = ["blue", "red"];
 
 const makeStateList = () => {
     d3.select('#stateList').selectAll('p')
