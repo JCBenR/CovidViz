@@ -74,6 +74,7 @@ let maxValue = 1_200_000;
 let month = months[0];
 let states;
 let monthIdx = 0;
+let yearData = [];
 
 Promise.all([
     d3.json("combo.json"),
@@ -93,23 +94,32 @@ Promise.all([
         monthIdx = months.indexOf(ddMonth.value);
         console.log(monthIdx);
     })
+    // drawGraph();
+})
+.catch((e) => {
+    for (const x of Object.entries(e)) {
+        console.error(x);
+    }
+    //console.error(typeof e);
+});
 
-    let yearData = [];
-    months.forEach(m => {
+async function drawGraph(){
+    yearData = [];
+    await months.forEach(m => {
         let yrObj = {
             m: m,
             data: []
         }
-        for (const x of covidData) {
+        for (const x of selectedStates) {
             try {
                 let newObj = {
-                    State: x.State,
-                    ABBR: x.ABBR,
-                    Pop: parseInt(x.Population.replace(/,/g, '')),
-                    Cases: x.data[m][0],
+                    State: x.name.State,
+                    ABBR: x.name.ABBR,
+                    Pop: parseInt(x.name.Population.replace(/,/g, '')),
+                    Cases: x.name.data[m][0],
                     //CasePer: ,
-                    Rate: x.data[m][1],
-                    UnEmp: Math.ceil(findEmpData(x.Population, x.data[m][1]))
+                    Rate: x.name.data[m][1],
+                    UnEmp: Math.ceil(findEmpData(x.name.Population, x.name.data[m][1]))
                 }
                 yrObj.data.push(newObj);
                 // console.log(newObj);
@@ -120,10 +130,10 @@ Promise.all([
         yearData.push(yrObj);
     })
     // console.log(yearData.filter(obj => {return obj.m === month;})[0]);
-    //console.log(yearData);
+    console.log(yearData);
     const dataStack = d3.stack().keys(["Cases", "UnEmp"]);
     let sf = [];
-    yearData.forEach(e => {
+    await yearData.forEach(e => {
 
         let dsf = dataStack(e.data);
         sf.push(dsf);
@@ -207,7 +217,8 @@ Promise.all([
         })
         .enter()
         .append("rect")
-        .attr("x", function (d) { return x(d.data.ABBR); })
+        .attr("x", function (d) { console.log(d);
+            return x(d.data.ABBR);})
         .attr("y", d => y(d[1])) //function (d) { return y(d[1] + d[0]); })
         .attr("height", d => y(d[0]) - y(d[1])) //function (d) { return y(d[1]) - y(d[1] + d[0]); })
         .attr("width", x.bandwidth())
@@ -225,13 +236,6 @@ Promise.all([
             div.transition()
                 .duration(500)
                 .style("opacity", 0);
-            // .on("mouseover", function () { tooltip.style("display", null); })
-            // .on("mouseout", function () { tooltip.style("display", "none"); })
-            // .on("mousemove", function (d) {
-            //     var xPosition = d3.mouse(this)[0] - 15;
-            //     var yPosition = d3.mouse(this)[1] - 25;
-            //     tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
-            //     tooltip.select("text").text(d[0]);
         });
 
 
@@ -251,13 +255,8 @@ Promise.all([
         .style("text-anchor", "middle")
         .attr("font-size", "12px")
         .attr("font-weight", "bold");
-})
-    .catch((e) => {
-        for (const x of Object.entries(e)) {
-            console.error(x);
-        }
-        //console.error(typeof e);
-    });
+};
+
 
 
 /**
@@ -303,7 +302,7 @@ function handleClick(e, d) {
     }
     console.log('clicked ', d);
     console.log(selectedStates)
-    //updateGraph();
+    drawGraph();
 }
 
 function selectAllStates(e) {
