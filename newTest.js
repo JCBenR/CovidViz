@@ -102,8 +102,13 @@ Promise.all([
 });
 
 async function drawGraph(){
-    console.log(selectedStates);
-    console.log(covidData);
+    // console.log(selectedStates);
+    // console.log(covidData);
+    try {
+        d3.select("svg").remove();
+    } catch (error) {
+        console.error(error);
+    }
     yearData = [];
     await months.forEach(m => {
         let yrObj = {
@@ -129,8 +134,8 @@ async function drawGraph(){
         }
         yearData.push(yrObj);
     })
-    // console.log(yearData.filter(obj => {return obj.m === month;})[0]);
-    //console.log(yearData);
+    console.log(yearData.filter(obj => {return obj.m === month;})[0]);
+    // console.log(yearData);
     const dataStack = d3.stack().keys(["Cases", "UnEmp"]);
     let sf = [];
     await yearData.forEach(e => {
@@ -222,42 +227,40 @@ async function drawGraph(){
         .attr("y", d => y(d[1])) //function (d) { return y(d[1] + d[0]); })
         .attr("height", d => y(d[0]) - y(d[1])) //function (d) { return y(d[1]) - y(d[1] + d[0]); })
         .attr("width", x.bandwidth())
-        .on("mouseover", function (d) {
-            tooltip.style("display", null);
-            div.transition()
-                .duration(200)
-                .style("opacity", .9);
-            div.html(d.data.cases + "<br/>" + d.data.rate)
-                .style("left", (d3.event.pageX) + "px")
-                .style("top", (d3.event.pageY - 28) + "px");
-        })
-        .on("mouseout", function (d) {
-            tooltip.style("display", "none");
-            div.transition()
-                .duration(500)
-                .style("opacity", 0);
-        });
+    //     .on("mouseover", function (d) {
+    //         tooltip.style("display", null);
+    //         div.transition()
+    //             .duration(200)
+    //             .style("opacity", .9);
+    //         div.html(d.data.cases + "<br/>" + d.data.rate)
+    //             .style("left", (d3.event.pageX) + "px")
+    //             .style("top", (d3.event.pageY - 28) + "px");
+    //     })
+    //     .on("mouseout", function (d) {
+    //         tooltip.style("display", "none");
+    //         div.transition()
+    //             .duration(500)
+    //             .style("opacity", 0);
+    //     });
 
 
-    var tooltip = svg.append("g")
-        .attr("class", "tooltip")
-        .style("display", "none");
+    // var tooltip = svg.append("g")
+    //     .attr("class", "tooltip")
+    //     .style("display", "none");
 
-    tooltip.append("rect")
-        .attr("width", 30)
-        .attr("height", 20)
-        .attr("fill", "black")
-        .style("opacity", .5);
+    // tooltip.append("rect")
+    //     .attr("width", 30)
+    //     .attr("height", 20)
+    //     .attr("fill", "black")
+    //     .style("opacity", .5);
 
-    tooltip.append("text")
-        .attr("x", 15)
-        .attr("dy", "1.2em")
-        .style("text-anchor", "middle")
-        .attr("font-size", "12px")
-        .attr("font-weight", "bold");
+    // tooltip.append("text")
+    //     .attr("x", 15)
+    //     .attr("dy", "1.2em")
+    //     .style("text-anchor", "middle")
+    //     .attr("font-size", "12px")
+    //     .attr("font-weight", "bold");
 };
-
-
 
 /**
  * function transforms population from string to number, then changes rate to percent decimal (ie, 5.1 >> .0051), then multiplies the two to get the total number of unemployed in the state
