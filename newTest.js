@@ -90,11 +90,9 @@ Promise.all([
 
     var ddMonth = document.getElementById("monthDD");
     ddMonth.addEventListener("change", () => {
-        console.log(ddMonth);
         monthIdx = months.indexOf(ddMonth.value);
-        console.log(monthIdx);
+        drawGraph();
     })
-    // drawGraph();
 })
 .catch((e) => {
     for (const x of Object.entries(e)) {
@@ -104,6 +102,8 @@ Promise.all([
 });
 
 async function drawGraph(){
+    console.log(selectedStates);
+    console.log(covidData);
     yearData = [];
     await months.forEach(m => {
         let yrObj = {
@@ -113,13 +113,13 @@ async function drawGraph(){
         for (const x of selectedStates) {
             try {
                 let newObj = {
-                    State: x.name.State,
-                    ABBR: x.name.ABBR,
-                    Pop: parseInt(x.name.Population.replace(/,/g, '')),
-                    Cases: x.name.data[m][0],
+                    State: x.State,
+                    ABBR: x.ABBR,
+                    Pop: parseInt(x.Population.replace(/,/g, '')),
+                    Cases: x.data[m][0],
                     //CasePer: ,
-                    Rate: x.name.data[m][1],
-                    UnEmp: Math.ceil(findEmpData(x.name.Population, x.name.data[m][1]))
+                    Rate: x.data[m][1],
+                    UnEmp: Math.ceil(findEmpData(x.Population, x.data[m][1]))
                 }
                 yrObj.data.push(newObj);
                 // console.log(newObj);
@@ -130,7 +130,7 @@ async function drawGraph(){
         yearData.push(yrObj);
     })
     // console.log(yearData.filter(obj => {return obj.m === month;})[0]);
-    console.log(yearData);
+    //console.log(yearData);
     const dataStack = d3.stack().keys(["Cases", "UnEmp"]);
     let sf = [];
     await yearData.forEach(e => {
@@ -154,7 +154,7 @@ async function drawGraph(){
 
     var currYear = yearData.filter(obj => { return obj.m === month; })[0];
 
-    var currYearData = sf[10]; //change this to monthIdx when working
+    var currYearData = sf[monthIdx]; //change this to monthIdx when working
 
     console.log(currYearData);
 
@@ -292,13 +292,13 @@ function handleClick(e, d) {
         let canvasWidth = parseFloat(d3.select('#canvas').style('width'));
         let canvasHeight = parseFloat(d3.select('#canvas').style('height'));
         let stateData = {};
-        stateData.name = d;
+        stateData = d;
         stateData.x = canvasWidth * Math.random();
         stateData.y = canvasHeight * Math.random();
         selectedStates.push(stateData);
         //console.log(covidData.AK);
     } else { //unselected
-        selectedStates = selectedStates.filter(x => x.name != d);
+        selectedStates = selectedStates.filter(x => x != d);
     }
     console.log('clicked ', d);
     console.log(selectedStates)
@@ -307,13 +307,14 @@ function handleClick(e, d) {
 
 function selectAllStates(e) {
     if (e.className === "selectAll") {
-        selectedStates = [...covidData];
+        selectedStates = covidData;
         let sl = document.getElementById("stateList").getElementsByTagName("p");
         for (const x of sl) {
             x.className = "selected";
         }
         e.innerHTML = "Deselect All";
         e.className = "deselectAll";
+        drawGraph();
     }
     else {
         selectedStates = [];
@@ -323,7 +324,9 @@ function selectAllStates(e) {
         }
         e.innerHTML = "Select All";
         e.className = "selectAll";
+        drawGraph();
     }
+    
 }
 
 function createMonthDropDown() {
